@@ -1,4 +1,4 @@
-<?php namespace Modulework\Modules\Http;
+<?php namespace Modulework\Modules\Container;
 /*
  * (c) Christian Gärtner <christiangaertner.film@googlemail.com>
  * This file is part of the Modulework Framework
@@ -7,6 +7,7 @@
 
 use Closure;
 use ArrayAccess;
+use ReflectionClass;
 
 /**
 * A simple IoC Container
@@ -39,6 +40,13 @@ class Container implements ArrayAccess
      */
     public function bind($id, $concrete, $singleton = false)
     {
+
+        if (is_null($concrete)) {
+            
+            $concrete = $id;
+
+        }
+
         if (!$concrete instanceof Closure) {
             
             // If the factory (resolver) is NOT a closure we assume,
@@ -64,7 +72,7 @@ class Container implements ArrayAccess
      *
      * @uses bind()
      */
-    public function singleton($id, $concrete)
+    public function singleton($id, $concrete = null)
     {
         $this->bind($id, $concrete, true);
     }
@@ -88,12 +96,12 @@ class Container implements ArrayAccess
     public function resolve($id, array $parameters = array())
     {
         if (isset($this->singletons[$id])) {
-            return $this->singletons[$id]
+            return $this->singletons[$id];
         }
 
         $concrete = $this->getConcrete($id);
 
-        if ($this->isInstantiatable($id, $concrete)) {
+        if ($this->isInstantiable($id, $concrete)) {
             
             $object = $this->build($concrete, $parameters);
 
@@ -110,5 +118,100 @@ class Container implements ArrayAccess
         }
 
         return $object;
+    }
+
+    /**
+     * Instantiate a concrete
+     * @param  string|Closure       $concrete   The concrete
+     * @param  array                $parameters Parameters are getting passed to the factory
+     * @return mixed                            The new instance
+     */
+    public function build($concrete, array $parameters = array())
+    {
+        if ($concrete instanceof Closure) {
+            return $concrete($this, $parameters);
+        }
+
+        $resolver = new ReflectionClass($concrete);
+
+        if (!$resolver->isInstantiable()) {
+            
+            throw new RunTimeException('Target <' . $concrete . '> is not instantiable.');
+            
+        }
+
+        $constructor = $resolver->getConstructor();
+
+        // If there is no constructor we can just return a new one
+        // (otherwise are parameters required)
+        if (is_null($constructor)) {
+            
+            return new $concrete;
+
+        }
+
+        $dependencies = $this->getDependencies($constructor->getParameters());
+
+        return $resolver->newInstanceArgs($dependencies);
+    }
+
+    /**
+     * Returns the concrete of the given id
+     * @param  string $id The id
+     * @return mixed      The concrete
+     */
+    protected function getConcrete($id)
+    {
+        if (!isset($this->binds[$id])) {
+            
+            return $id;
+
+        } else {
+
+            return $this->binds[$id]['concrete'];
+
+        }
+    }
+
+    protected function isInstantiable($id, $concrete)
+    {
+        return ($concrete === $id || $concrete instanceof Closure);
+    }
+
+    protected function isSingelton($id)
+    {
+        return (isset($this->binds[$id]['singleton']) && $this->binds[$id]['singleton'] === true);
+    }
+
+    /**
+     * ArrayAccess Implementation
+     */
+    
+    public function offsetExists($key)
+    {
+        return isset($this->binds[$key]);
+    }
+
+    public function offsetGet($key)
+    {
+        return $this->resolve($key);
+    }
+
+    public function offsetSet($key, $value)
+    {
+        if (!$value instanceof Closure) {
+            
+            $value = function() use ($value)
+            {
+                return $value;
+            };
+
+            $this->bind($key, $value);
+        }
+    }
+
+    public function offsetUnset($key)
+    {
+        unset($this->binds[$key]);
     }
 }
