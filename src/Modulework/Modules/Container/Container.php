@@ -8,6 +8,8 @@
 use Closure;
 use ArrayAccess;
 use ReflectionClass;
+use Modulework\Modules\Container\Exceptions\ResolveException;
+use Modulework\Modules\Container\Exceptions\ParameterResolveException;
 
 /**
 * A simple IoC Container
@@ -107,7 +109,7 @@ class Container implements ArrayAccess
 
         } else {
 
-            $object = $this->make($concrete, $parameters);
+            $object = $this->resolve($concrete, $parameters);
 
         }
 
@@ -136,7 +138,7 @@ class Container implements ArrayAccess
 
         if (!$resolver->isInstantiable()) {
             
-            throw new RunTimeException('Target <' . $concrete . '> is not instantiable.');
+            throw new ResolveException('Target <' . $concrete . '> is not instantiable.');
             
         }
 
@@ -173,14 +175,101 @@ class Container implements ArrayAccess
         }
     }
 
+    /**
+     * Checks if a concrete can get instantiated
+     * @param  string  $id       The id of the concrete
+     * @param  mixed   $concrete The concrete
+     * @return boolean           Whether the conrete is instantiable
+     */
     protected function isInstantiable($id, $concrete)
     {
         return ($concrete === $id || $concrete instanceof Closure);
     }
 
+    /**
+     * Checks whether the binding is a singelton
+     * @param  string  $id The id
+     * @return boolean     Whether the binding is a singelton
+     */
     protected function isSingelton($id)
     {
         return (isset($this->binds[$id]['singleton']) && $this->binds[$id]['singleton'] === true);
+    }
+
+    /**
+     * Resolve all dependencies of the reflection parameters
+     * @param  array $parameters The parameters
+     * @return array             The resolved dependencies
+     */
+    protected function getDependencies($parameters)
+    {
+        $dependencies = array();
+
+        foreach ($parameters as $parameter) {
+            
+            $dependency = $parameter->getClass();
+
+            if (is_null($dependency)) {
+                // It 's a string or the like
+                $dependencies[] = $this->resolveArgument($parameter);
+
+            } else {
+
+                $dependencies[] = $this->resolveClass($parameter);
+
+            }
+        }
+
+        return (array) $dependencies;
+    }
+
+    /**
+     * Resolve a class.
+     * @param  \ReflectionParameter $parameter The parameter
+     * @return mixed                           The resolved class
+     *
+     * @throws \Modulework\Modules\Container\Exceptions\ResolveException If the class cannot get resolved.
+     */
+    protected function resolveClass($parameter)
+    {
+        try {
+            
+            return $this->resolve($parameter->getClass()->name());
+
+        } catch (ResolveException $e) {
+            
+            if ($parameter->isOptional()) {
+                // Just pass the default
+                return $parameter->getDefaultValue();
+
+            } else {
+
+                throw $e;
+
+            }
+
+        }
+    }
+
+    /**
+     * Resolve a non-class argument
+     * @param  \ReflectionParamter $parameter The parameter
+     * @return mixed                          The resolved type
+     *
+     * @throws \Modulework\Modules\Container\Exceptions\ParameterResolveException If the parameter cannot get resolved.
+     */
+    protected function resolveArgument($parameter)
+    {
+        if ($parameter->isDefaultValueAvailable()) {
+            
+            return $parameter->getDefaultValue();
+
+        } else {
+            // We cannot guess the value, can we!
+            
+            throw new ParameterResolveException('Unresolvable parameter <' . $parameter . '>');
+            
+        }
     }
 
     /**
