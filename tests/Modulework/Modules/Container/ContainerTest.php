@@ -63,6 +63,31 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals($c, $con);
     }
+
+    public function testParamertersGettingPassedToResolver()
+    {
+        $con = new Container;
+        $con->bind('foo', function ($c, $p) {
+            return $p;
+        });
+
+        $params = array('foo', 'bar', 'baz');
+
+        $this->assertEquals($params, $con->resolve('foo', $params));
+    }
+
+    public function testInstance()
+    {
+        $con = new Container;
+
+        $obj = new StdClass;
+        $obj->name = 'Foo';
+
+        $con->instance('foo', $obj);
+
+        $this->assertEquals($obj, $con->resolve('foo'));
+
+    }
 }
 
 
