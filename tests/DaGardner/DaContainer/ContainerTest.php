@@ -106,15 +106,14 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     public function testExceptionOnBuildCustom()
     {
         $con = new Container;
-        $con->bind('foo', 'PrivateConcreteStub');
-        $con->build('foo');
+        $con->build('PrivateConcreteStub');
     }
 }
 
 
 class ConcreteStub { }
 
-class ConcreteStub
+class PrivateConcreteStub
 {
     private function __construct() {}
 }
