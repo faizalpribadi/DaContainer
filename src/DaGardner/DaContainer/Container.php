@@ -1,17 +1,18 @@
-<?php namespace Modulework\Modules\Container;
+<?php namespace DaGardner\DaContainer;
 /*
- * (c) Christian Gärtner <christiangaertner.film@googlemail.com>
- * This file is part of the Modulework Framework
+ *  (c) Christian Gärtner <christiangaertner.film@googlemail.com>
+ * This file is part of the DaContainer package
  * License: View distributed LICENSE file
  */
 
 use Closure;
 use ArrayAccess;
 use ReflectionClass;
-use Modulework\Modules\Container\Exceptions\ResolveException;
-use Modulework\Modules\Container\Exceptions\ParameterResolveException;
+use DaGardner\DaContainer\Exceptions\ResolveException;
+use DaGardner\DaContainer\Exceptions\ParameterResolveException;
 
 /**
+* DaContainer main class.
 * A simple IoC Container
 */
 class Container implements ArrayAccess

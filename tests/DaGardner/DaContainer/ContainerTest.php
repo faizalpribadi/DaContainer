@@ -8,7 +8,7 @@
  * This file is meant to be used in PHPUnit Tests
  */
 
-use Modulework\Modules\Container\Container;
+use DaGardner\DaContainer\Container;
 
 /**
 * PHPUnit Test

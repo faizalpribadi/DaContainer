@@ -1,6 +1,2 @@
 /vendor/
-/apigen/
-/build/result/
-phploc.phar
-container.sublime-workspace
-container.sublime-project
+/build

@@ -1,7 +1,7 @@
-<?php namespace Modulework\Modules\Container\Exceptions;
+<?php namespace DaGardner\DaContainer\Exceptions;
 /*
- * (c) Christian Gärtner <christiangaertner.film@googlemail.com>
- * This file is part of the Modulework Framework
+ *  (c) Christian Gärtner <christiangaertner.film@googlemail.com>
+ * This file is part of the DaContainer package
  * License: View distributed LICENSE file
  */
 

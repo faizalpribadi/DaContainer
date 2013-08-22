@@ -1,8 +1,8 @@
 {
-    "name": "modulework/container",
+    "name": "dagardner/dacontainer",
     "type": "library",
-    "keywords": ["framework"],
-    "description": "Container package for the MODULEWork Framework",
+    "keywords": ["ioc", "container", "dependency"],
+    "description": "A simple but still advanced IoC container.",
     "require-dev": {
     },
     "license": "MIT",
@@ -17,7 +17,7 @@
     },
     "autoload": {
         "psr-0": {
-            "Modulework\\": "src/"
+            "DaGardner\\": "src/"
         }
     },
     "minimum-stability": "dev"
