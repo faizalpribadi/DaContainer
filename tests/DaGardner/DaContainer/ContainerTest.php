@@ -88,7 +88,33 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($obj, $con->resolve('foo'));
 
     }
+
+    /**
+     * @expectedException ReflectionException
+     * \DaGardner\DaContainer\Exceptions\
+     */
+    public function testExceptionOnBuild()
+    {
+        $con = new Container;
+        $con->bind('foo', 'bar');
+        $con->build('foo');
+    }
+
+    /**
+     * @expectedException \DaGardner\DaContainer\Exceptions\ResolveException
+     */
+    public function testExceptionOnBuildCustom()
+    {
+        $con = new Container;
+        $con->bind('foo', 'PrivateConcreteStub');
+        $con->build('foo');
+    }
 }
 
 
 class ConcreteStub { }
+
+class ConcreteStub
+{
+    private function __construct() {}
+}

@@ -99,7 +99,9 @@ class Container implements ArrayAccess
     public function resolve($id, array $parameters = array())
     {
         if (isset($this->singletons[$id])) {
+
             return $this->singletons[$id];
+
         }
 
         $concrete = $this->getConcrete($id);
@@ -132,7 +134,9 @@ class Container implements ArrayAccess
     public function build($concrete, array $parameters = array())
     {
         if ($concrete instanceof Closure) {
+
             return $concrete($this, $parameters);
+
         }
 
         $resolver = new ReflectionClass($concrete);
@@ -235,7 +239,7 @@ class Container implements ArrayAccess
     {
         try {
             
-            return $this->resolve($parameter->getClass()->name());
+            return $this->resolve($parameter->getClass()->name);
 
         } catch (ResolveException $e) {
             
