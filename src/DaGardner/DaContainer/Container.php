@@ -36,6 +36,12 @@ class Container implements ArrayAccess
     protected $callbacks = array();
 
     /**
+     * Registered "silent" resolver callbacks
+     * @var array
+     */
+    protected $silentCallbacks = array();
+
+    /**
      * Register a binding
      * @param  string               $id        The id (needed for resolving)
      * @param  Closure|string|null  $concrete  The factory
@@ -122,6 +128,10 @@ class Container implements ArrayAccess
 
         }
 
+        $object = $this->fireCallbacks($object);
+
+        $this->fireSilentCallbacks($object);
+
         return $object;
     }
 
@@ -160,6 +170,19 @@ class Container implements ArrayAccess
         $dependencies = $this->getDependencies($constructor->getParameters());
 
         return $resolver->newInstanceArgs($dependencies);
+    }
+
+    public function onResolving(Closure $callback, $silent = true)
+    {
+        if ($silent) {
+            
+            $this->silentCallbacks[] = $callback;
+
+        } else {
+
+            $this->callbacks[] = $callback;
+
+        }
     }
 
     /**
@@ -274,6 +297,26 @@ class Container implements ArrayAccess
             
             throw new ParameterResolveException('Unresolvable parameter <' . $parameter . '>');
             
+        }
+    }
+
+    protected function fireCallbacks($object)
+    {
+        foreach ($this->callbacks as $callback) {
+            
+            $object = call_user_func($callback, $object);
+
+        }
+
+        return $object;
+    }
+
+    protected function fireSilentCallbacks($object)
+    {
+        foreach ($this->silentCallbacks as $callback) {
+            
+            call_user_func($callback, $object);
+
         }
     }
 
