@@ -172,6 +172,39 @@ class Container implements ArrayAccess
         return $resolver->newInstanceArgs($dependencies);
     }
 
+    public function enableInjecterDetection()
+    {
+        $this->onResolving(function($object)
+        {   
+            $class = get_class($object);
+
+            $reflection = new ReflectionClass($class);
+
+            $methods = $reflection->getMethods();
+
+            foreach ($methods as $method) {
+
+                if (strpos($method->name, 'set') === 0) {
+                    echo "\nFoo";
+                    try {
+                        
+                        $dependencies = $this->getDependencies($method->getParameters());
+
+                        call_user_func_array(array($object, $method->name), $dependencies);
+
+                    } catch (ResolveException $e) {
+                        throw $e;
+                    } catch (ParameterResolveException $e) {
+                        throw $e;
+                    }
+                }
+            }
+            
+            return $object;
+
+        }, false);
+    }
+
     public function onResolving(Closure $callback, $silent = true)
     {
         if ($silent) {
@@ -226,8 +259,8 @@ class Container implements ArrayAccess
 
     /**
      * Resolve all dependencies of the reflection parameters
-     * @param  array $parameters The parameters
-     * @return array             The resolved dependencies
+     * @param  array $parameters    The parameters
+     * @return array                The resolved dependencies
      */
     protected function getDependencies($parameters)
     {
@@ -236,7 +269,6 @@ class Container implements ArrayAccess
         foreach ($parameters as $parameter) {
             
             $dependency = $parameter->getClass();
-
             if (is_null($dependency)) {
                 // It 's a string or the like
                 $dependencies[] = $this->resolveArgument($parameter);
@@ -261,7 +293,7 @@ class Container implements ArrayAccess
     protected function resolveClass($parameter)
     {
         try {
-            
+
             return $this->resolve($parameter->getClass()->name);
 
         } catch (ResolveException $e) {
@@ -311,7 +343,7 @@ class Container implements ArrayAccess
 
         foreach ($this->callbacks as $callback) {
             
-            $object = call_user_func($callback, $object);
+            $object = $callback($object);
 
         }
 
