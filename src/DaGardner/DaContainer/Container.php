@@ -100,9 +100,10 @@ class Container implements ArrayAccess
      * Resolve a binding
      * @param  string $id         The id (used while binding)
      * @param  array  $parameters Parameters are getting passed to the factory
+     * @param  bool   $final      Whether this the final resolve of a class
      * @return mixed              The return value of the closure
      */
-    public function resolve($id, array $parameters = array())
+    public function resolve($id, array $parameters = array(), $final = true)
     {
         if (isset($this->singletons[$id])) {
 
@@ -118,7 +119,7 @@ class Container implements ArrayAccess
 
         } else {
 
-            $object = $this->resolve($concrete, $parameters);
+            $object = $this->resolve($concrete, $parameters, false);
 
         }
 
@@ -128,9 +129,10 @@ class Container implements ArrayAccess
 
         }
 
-        $object = $this->fireCallbacks($object);
-
-        $this->fireSilentCallbacks($object);
+        if ($final) {
+            $object = $this->fireCallbacks($object);
+            $this->fireSilentCallbacks($object);
+        }        
 
         return $object;
     }
@@ -174,8 +176,11 @@ class Container implements ArrayAccess
 
     public function enableInjecterDetection()
     {
+        throw new Exception('This feature is currently indev.');
+        return;
+
         $this->onResolving(function($object)
-        {   
+        {
             $class = get_class($object);
 
             $reflection = new ReflectionClass($class);
@@ -185,7 +190,6 @@ class Container implements ArrayAccess
             foreach ($methods as $method) {
 
                 if (strpos($method->name, 'set') === 0) {
-                    echo "\nFoo";
                     try {
                         
                         $dependencies = $this->getDependencies($method->getParameters());
@@ -294,7 +298,7 @@ class Container implements ArrayAccess
     {
         try {
 
-            return $this->resolve($parameter->getClass()->name);
+            return $this->resolve($parameter->getClass()->name, array(), false);
 
         } catch (ResolveException $e) {
             

@@ -128,6 +128,13 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $con->resolve('foo');
     }
 
+    public function testDependenyInjectionConstructor()
+    {
+        $con = new Container;
+        $this->isInstanceOf('ConcreteDependsOn', $con->resolve('ConcreteDependsOn'));
+
+    }
+
     /**
      * @expectedException ReflectionException
      * \DaGardner\DaContainer\Exceptions\
@@ -151,6 +158,11 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
 
 class ConcreteStub { }
+
+class ConcreteDependsOn
+{
+    function __construct(ConcreteStub $dep) {}
+}
 
 class PrivateConcreteStub
 {
