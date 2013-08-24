@@ -89,6 +89,45 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
     }
 
+    public function testResolverCallbacks()
+    {
+        $con = new Container;
+
+        $con->onResolving(function($object) {
+            $object->bar = 'baz';
+            return $object;
+        }, false);
+
+        $con->bind('foo', function()
+        {
+            return new stdClass;
+        });
+
+
+        $this->assertEquals('baz', $con->resolve('foo')->bar);
+    }
+
+    public function testSilentResolverCallbacks()
+    {
+        $con = new Container;
+
+        $con->onResolving(function($object)
+        {
+            echo $object->foo;
+        });
+
+        $con->bind('foo', function()
+        {
+            $ret = new stdClass;
+            $ret->foo = 'bar';
+            return $ret;
+        });
+
+        $this->expectOutputString('bar');
+
+        $con->resolve('foo');
+    }
+
     /**
      * @expectedException ReflectionException
      * \DaGardner\DaContainer\Exceptions\

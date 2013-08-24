@@ -302,6 +302,13 @@ class Container implements ArrayAccess
 
     protected function fireCallbacks($object)
     {
+        if (count($this->callbacks) == 0) {
+            
+            return $object;
+
+        }
+
+
         foreach ($this->callbacks as $callback) {
             
             $object = call_user_func($callback, $object);
