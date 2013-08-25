@@ -259,17 +259,35 @@ class Container implements ArrayAccess
             
             return $object;
 
-        });
+        }, -255);
+    }
+
+    public function disableInjecterDetection()
+    {
+        
     }
 
     /**
      * Register a listener for the resolving event.
      * This is only fired on the main resolve, not internal dependency resolves.
+     *
+     * NOTE: The high priorities are getting fired LAST, while negative (lower)
+     * are getting fired FIRST.
+     *
+     * <strong>Reserved priorities</strong>
+     * - -255 Injector Method Detection (this should fire as the first callback.)
+     * 
      * @param  Closure $callback The listener
+     * @param  int     $priority The priortiy of the listener
      */
-    public function onResolving(Closure $callback)
-    {            
-        $this->callbacks[] = $callback;
+    public function onResolving(Closure $callback, $priority = 0)
+    {
+        if (!isset($this->callbacks[$priority])) {
+            
+            $this->callbacks[$priority] = array();
+
+        }
+        $this->callbacks[$priority][] = $callback;
     }
 
     /**
@@ -374,9 +392,14 @@ class Container implements ArrayAccess
 
     protected function fireCallbacks($object)
     {
-        foreach ($this->callbacks as $callback) {
+        ksort($this->callbacks);
+        foreach ($this->callbacks as $priorities) {
             
-            $callback($object);
+            foreach ($priorities as $callback) {
+                
+                $callback($object);
+
+            }
 
         }
     }

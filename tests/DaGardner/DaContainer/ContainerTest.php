@@ -227,6 +227,24 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
         $obj = $con->resolve('DependsOnString');
     }
+
+    public function testEventPriority()
+    {
+        $con = new Container;
+        $con->onResolving(function($object) {
+            $object->name = 'foo';
+        }, -10);
+
+        $con->onResolving(function($object) {
+            $object->name = 'bar';
+        }, 10);
+
+        $con->bind('foo', function() {
+            return new stdClass;
+        });
+
+        $this->assertEquals('bar', $con->resolve('foo')->name);
+    }
 }
 
 
