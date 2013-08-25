@@ -14,6 +14,7 @@ use DaGardner\DaContainer\Exceptions\ParameterResolveException;
 /**
 * DaContainer main class.
 * A simple IoC Container
+* @author Christian Gärtner <christiangaertner.film@googlemail.com>
 */
 class Container implements ArrayAccess
 {
@@ -59,8 +60,8 @@ class Container implements ArrayAccess
             $concrete = function($container) use ($id, $concrete)
             {
                 $method = ($id == $concrete) ? 'build' : 'resolve';
-                
-                $container->$method($concrete);
+
+                return $container->$method($concrete, array(), false);
             };
         }
 
@@ -91,10 +92,19 @@ class Container implements ArrayAccess
     }
 
     /**
+     * Removes a binding 
+     * @param  string $id The id (used while binding)
+     */
+    public function remove($id)
+    {
+        unset($this->binds[$id]);
+    }
+
+    /**
      * Resolve a binding
      * @param  string $id         The id (used while binding)
      * @param  array  $parameters Parameters are getting passed to the factory
-     * @param  bool   $final      Whether this the final resolve of a class
+     * @param  boolen $final      Whether this the final resolve of a class
      * @return mixed              The return value of the closure
      */
     public function resolve($id, array $parameters = array(), $final = true)
@@ -108,8 +118,8 @@ class Container implements ArrayAccess
         $concrete = $this->getConcrete($id);
 
         if ($this->isInstantiable($id, $concrete)) {
-            
-            $object = $this->build($concrete, $parameters);
+
+            $object = $this->build($concrete, $parameters, false);
 
         } else {
 
@@ -134,9 +144,10 @@ class Container implements ArrayAccess
      * Instantiate a concrete
      * @param  string|Closure       $concrete   The concrete
      * @param  array                $parameters Parameters are getting passed to the factory
+     * @param  boolen               $final      Whether this the final resolve of a class
      * @return mixed                            The new instance
      */
-    public function build($concrete, array $parameters = array())
+    public function build($concrete, array $parameters = array(), $final = true)
     {
         if ($concrete instanceof Closure) {
 
@@ -163,8 +174,17 @@ class Container implements ArrayAccess
         }
 
         $dependencies = $this->getDependencies($constructor->getParameters());
-
         return $resolver->newInstanceArgs($dependencies);
+    }
+
+    /**
+     * Determine if an ID is already bound
+     * @param  string  $id The ID
+     * @return boolean     Whether the ID is bound
+     */
+    public function isBound($id)
+    {
+        return isset($this->binds[$id]);
     }
 
     /**
@@ -236,6 +256,11 @@ class Container implements ArrayAccess
         });
     }
 
+    /**
+     * Register a listener for the resolving event.
+     * This is only fired on the main resolve, not internal dependency resolves.
+     * @param  Closure $callback The listener
+     */
     public function onResolving(Closure $callback)
     {            
         $this->callbacks[] = $callback;
@@ -249,8 +274,15 @@ class Container implements ArrayAccess
     protected function getConcrete($id)
     {
         if (!isset($this->binds[$id])) {
+
+            if (class_exists($id)) {
+
+                return $id;
+
+            }
             
-            return $id;
+            throw new ResolveException('ID is not bound and not a class');
+            
 
         } else {
 
@@ -320,7 +352,7 @@ class Container implements ArrayAccess
             return $this->resolve($parameter->getClass()->name, array(), false);
 
         } catch (ResolveException $e) {
-            
+
             if ($parameter->isOptional()) {
                 // Just pass the default
                 return $parameter->getDefaultValue();
@@ -368,31 +400,50 @@ class Container implements ArrayAccess
      * ArrayAccess Implementation
      */
     
-    public function offsetExists($key)
+    /**
+     * ArrayAccess
+     * @param  string $id  The id used on bind()
+     * @return boolean     Whether the id is bound
+     *
+     * @uses isBound()
+     */
+    public function offsetExists($id)
     {
-        return isset($this->binds[$key]);
+        return $this->isBound($id);
     }
 
-    public function offsetGet($key)
+    /**
+     * Resolve a binding
+     * @param  string $id The id (used while binding)
+     * @return mixed      The return value of the closure
+     *
+     * @uses resolve()
+     */
+    public function offsetGet($id)
     {
-        return $this->resolve($key);
+        return $this->resolve($id);
     }
 
-    public function offsetSet($key, $value)
+    /**
+     * Register a binding
+     * @param  string               $id        The id (needed for resolving)
+     * @param  Closure|string|null  $value     The factory
+     *
+     * @uses bind()
+     */
+    public function offsetSet($id, $value)
     {
-        if (!$value instanceof Closure) {
-            
-            $value = function() use ($value)
-            {
-                return $value;
-            };
-
-            $this->bind($key, $value);
-        }
+        $this->bind($id, $value);
     }
 
-    public function offsetUnset($key)
+    /**
+     * Removes a binding
+     * @param  string $if The id (used while binding)
+     *
+     * @uses remove()
+     */
+    public function offsetUnset($id)
     {
-        unset($this->binds[$key]);
+        $this->remove($id);
     }
 }

@@ -109,6 +109,8 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     public function testDependenyInjectionConstructor()
     {
         $con = new Container;
+        $con->bind('ConcreteStubInterface', 'ConcreteStub');
+
         $this->isInstanceOf('ConcreteDependsOn', $con->resolve('ConcreteDependsOn'));
 
     }
@@ -127,6 +129,48 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $obj = $con->resolve('ConcreteInjectorMethods');
 
         $this->assertTrue($obj->debug);
+    }
+
+    /**
+     * @expectedException \DaGardner\DaContainer\Exceptions\ResolveException
+     */
+    public function testRemove()
+    {
+        $con = new Container;
+        $con->bind('foo', function() {
+            return 'foo';
+        });
+
+        $con->remove('foo');
+
+        $con->resolve('foo');
+    }
+
+    public function testIsBound()
+    {
+        $con = new Container;
+        $con->bind('foo', function() {
+            return 'foo';
+        });
+
+        $this->assertTrue($con->isBound('foo'));
+    }
+
+    public function testArrayAccess()
+    {
+        $con = new Container;
+
+        $con['foo'] = function() {
+            return 'bar';
+        };
+
+        $this->assertTrue(isset($con['foo']));
+
+        $this->assertEquals('bar', $con['foo']);
+
+        unset($con['foo']);
+
+        $this->assertFalse($con->isBound('foo'));
     }
 
     /**
@@ -150,11 +194,13 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 }
 
 
-class ConcreteStub { }
+class ConcreteStub implements ConcreteStubInterface {}
+
+interface ConcreteStubInterface {}
 
 class ConcreteDependsOn
 {
-    function __construct(ConcreteStub $dep) {}
+    function __construct(ConcreteStubInterface $dep, $str = 'Foo') {}
 }
 
 class PrivateConcreteStub
