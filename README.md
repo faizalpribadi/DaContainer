@@ -70,6 +70,8 @@ But how do we enable the injector method detection?
     $container->enableInjecterDetection();
     $container->resolve('Foo');
 
+**NOTE** This feature (```enableInjecterDetection()```) requires PHP 5.4 or higher. *In PHP 5.3 closure to object binding is not supported, which is crucial for this feature to work.*
+
 But this won' t work right now and throws a ```\DaGardner\DaContainer\Exceptions\ResolveException``` exception. Why?
 
 The container doesn' t know what to do with this ```LoggerInterface```. Since the container doesn' t know which implementation to use you have to tell it the container!

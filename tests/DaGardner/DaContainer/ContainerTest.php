@@ -115,8 +115,15 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
     }
 
+    /**
+     * This test is skipped if we' re not an 5.4 or higher
+     */
     public function testDependenyInjectionMethodDetection()
     {
+        if (version_compare(PHP_VERSION, '5.4.0') <= 0) {
+            return true;
+        }
+
         $con = new Container;
         $con->enableInjecterDetection(array(
             'setString',

@@ -8,6 +8,7 @@
 use Closure;
 use ArrayAccess;
 use ReflectionClass;
+use RunTimeException;
 use ReflectionException;
 use DaGardner\DaContainer\Exceptions\ResolveException;
 use DaGardner\DaContainer\Exceptions\ParameterResolveException;
@@ -209,12 +210,18 @@ class Container implements ArrayAccess
      * Strings in the main array are consired to be global and are ignored everytime.
      * The class specific blacklist is only checked if the object is an instance of this class
      * 
+     * <strong>This feature requires PHP 5.4 or higher</strong>
+     * 
      * @param  array  $blacklist A blacklist of method names
      *
      * @throws \DaGardner\DaContainer\Exceptions\ResolveException
      */
     public function enableInjecterDetection(array $blacklist = array())
     {
+        if (version_compare(PHP_VERSION, '5.4.0') <= 0) {
+            throw new RunTimeException('This feature requires PHP 5.4 or higher'); 
+        }
+
         $this->onResolving(function($object) use ($blacklist)
         {
             $class = get_class($object);
