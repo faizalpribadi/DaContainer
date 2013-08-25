@@ -271,7 +271,7 @@ class Container implements ArrayAccess
 
     public function disableInjecterDetection()
     {
-        
+        unset($this->callbacks[-255]);
     }
 
     /**
