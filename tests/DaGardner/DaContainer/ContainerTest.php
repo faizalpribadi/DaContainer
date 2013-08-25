@@ -185,12 +185,11 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException ReflectionException
+     * @expectedException \DaGardner\DaContainer\Exceptions\ResolveException
      */
     public function testExceptionOnBuild()
     {
         $con = new Container;
-        $con->bind('foo', 'bar');
         $con->build('foo');
     }
 
@@ -201,6 +200,15 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     {
         $con = new Container;
         $con->build('PrivateConcreteStub');
+    }
+
+    /**
+     * @expectedException \DaGardner\DaContainer\Exceptions\ResolveException
+     */
+    public function testDependsOnMissingClass()
+    {
+        $con = new Container;
+        $con->resolve('DependsOnMissingClass');
     }
 }
 
@@ -235,4 +243,9 @@ class ConcreteInjectorMethods
     {
         $this->debug = false;
     }
+}
+
+class DependsOnMissingClass
+{
+    public function __construct(Foo $foo) {}
 }

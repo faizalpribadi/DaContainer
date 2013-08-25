@@ -8,6 +8,7 @@
 use Closure;
 use ArrayAccess;
 use ReflectionClass;
+use ReflectionException;
 use DaGardner\DaContainer\Exceptions\ResolveException;
 use DaGardner\DaContainer\Exceptions\ParameterResolveException;
 
@@ -154,11 +155,19 @@ class Container implements ArrayAccess
             return $concrete($this, $parameters);
 
         }
+        try {
 
-        $resolver = new ReflectionClass($concrete);
+            $resolver = new ReflectionClass($concrete);
+
+        } catch (ReflectionException $e) {
+
+            throw new ResolveException('Target <' . $concrete . '> could not be found.');
+            
+        }
+        
 
         if (!$resolver->isInstantiable()) {
-            
+
             throw new ResolveException('Target <' . $concrete . '> is not instantiable.');
             
         }
@@ -322,8 +331,17 @@ class Container implements ArrayAccess
         $dependencies = array();
 
         foreach ($parameters as $parameter) {
-            
-            $dependency = $parameter->getClass();
+
+            try {
+
+                $dependency = $parameter->getClass();
+
+            } catch (ReflectionException $e) {
+                
+                throw new ResolveException('Target <' . $parameter . '> could not be found.');
+
+            }
+
             if (is_null($dependency)) {
                 // It 's a string or the like
                 $dependencies[] = $this->resolveArgument($parameter);
