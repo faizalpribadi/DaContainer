@@ -38,7 +38,7 @@ Even if this pattern is often consired to be an anti-pattern, I implemented it, 
       return new stdClass;
     });
 
-This closure is only called *once* during execution. The returned instance is stored and second resolve call will return the stored instance:
+This closure is only called *once* during execution. The returned instance is stored and a second resolve call will return the stored instance:
 
     ($container->resolve('foo') === $container->resolve('foo));
 
@@ -85,7 +85,7 @@ The ```Container::enableInjecterDetection()``` takes as optional argument a blac
 
 The exact display of the method is:
 
-    \DaGardner\DaContainer\Container::enableInjecterDetection([array $blacklist = array()])
+    \DaGardner\DaContainer\Container::enableInjecterDetection([array $blacklist = array(), string $version = PHP_VERSION]])
 
 The blacklist should (has to be) constructed like this:
 
