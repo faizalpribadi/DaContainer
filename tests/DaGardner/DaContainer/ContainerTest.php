@@ -131,6 +131,17 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($obj->debug);
     }
 
+    public function testDeepResolving()
+    {
+        $con = new Container;
+        $con->bind('foo', 'bar');
+        $con->bind('bar', function() {
+            return 'baz';
+        });
+
+        $this->assertEquals('baz', $con->resolve('foo'));
+    }
+
     /**
      * @expectedException \DaGardner\DaContainer\Exceptions\ResolveException
      */
