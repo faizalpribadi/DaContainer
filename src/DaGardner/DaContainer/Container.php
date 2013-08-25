@@ -213,12 +213,14 @@ class Container implements ArrayAccess
      * <strong>This feature requires PHP 5.4 or higher</strong>
      * 
      * @param  array  $blacklist A blacklist of method names
+     * @param  string $version   The current PHP_VERSION, default is the constant. This argument can be ignored! (used for unit-tests only)
      *
      * @throws \DaGardner\DaContainer\Exceptions\ResolveException
+     * @throws \RunTimeException (if PHP version is below 5.4.0)
      */
-    public function enableInjecterDetection(array $blacklist = array())
+    public function enableInjecterDetection(array $blacklist = array(), $version = PHP_VERSION)
     {
-        if (version_compare(PHP_VERSION, '5.4.0') <= 0) {
+        if (version_compare($version, '5.4.0') <= 0) {
             throw new RunTimeException('This feature requires PHP 5.4 or higher'); 
         }
 

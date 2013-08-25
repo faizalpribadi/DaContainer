@@ -275,6 +275,16 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals('bar', $con->resolve('foo')->name);
     }
+
+    /**
+     * DIMD => dependeny injection method detection
+     * @expectedException RunTimeException
+     */
+    public function testPHPThreeThrowsExceptionWithDIMD()
+    {       
+        $con = new Container;
+        $con->enableInjecterDetection(array(), '5.3.0');
+    }
 }
 
 
