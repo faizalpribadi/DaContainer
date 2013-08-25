@@ -113,9 +113,24 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
     }
 
+    public function testDependenyInjectionMethodDetection()
+    {
+        $con = new Container;
+        $con->enableInjecterDetection(array(
+            'setString',
+            '_CLASSES_' => array(
+                'ConcreteInjectorMethods' => array(
+                    'setArray'
+                )
+            )
+        ));
+        $obj = $con->resolve('ConcreteInjectorMethods');
+
+        $this->assertTrue($obj->debug);
+    }
+
     /**
      * @expectedException ReflectionException
-     * \DaGardner\DaContainer\Exceptions\
      */
     public function testExceptionOnBuild()
     {
@@ -145,4 +160,22 @@ class ConcreteDependsOn
 class PrivateConcreteStub
 {
     private function __construct() {}
+}
+
+class ConcreteInjectorMethods
+{
+    public $debug = false;
+    function setStdClass(stdClass $class) {
+        $this->debug = true;
+    }
+
+    public function setString($str = '')
+    {
+        $this->debug = false;
+    }
+
+    public function setArray(array $test)
+    {
+        $this->debug = false;
+    }
 }

@@ -167,12 +167,29 @@ class Container implements ArrayAccess
         return $resolver->newInstanceArgs($dependencies);
     }
 
-    public function enableInjecterDetection()
+    /**
+     * Enable the powerful injector method detection.
+     *
+     * Example blacklist array:
+     * [
+     *     'setString',
+     *     'setArray',
+     *     '_CLASSES_' => [
+     *         SomeClass' => [
+     *         'setMailer'
+     *         ]
+     *     ]
+     * 
+     * ]
+     *
+     * Strings in the main array are consired to be global and are ignored everytime.
+     * The class specific blacklist is only checked if the object is an instance of this class
+     * 
+     * @param  array  $blacklist A blacklist of method names
+     */
+    public function enableInjecterDetection(array $blacklist = array())
     {
-        throw new Exception('This feature is currently indev.');
-        return;
-
-        $this->onResolving(function($object)
+        $this->onResolving(function($object) use ($blacklist)
         {
             $class = get_class($object);
 
@@ -180,26 +197,43 @@ class Container implements ArrayAccess
 
             $methods = $reflection->getMethods();
 
+            /**
+             * Cycle thru all methods. Filtering in the next control-construct
+             */
             foreach ($methods as $method) {
 
+                /**
+                 * This is not a complex detection, but most injecter methods are starting with a set[...]
+                 */
                 if (strpos($method->name, 'set') === 0) {
+                    
+                    // Just check if the method is in the blacklist
+                    if (in_array($method->name, $blacklist) || (isset($blacklist['_CLASSES_'][$class]) && in_array($method->name, $blacklist['_CLASSES_'][$class]))) {
+                        continue;
+                    }
+
                     try {
                         
                         $dependencies = $this->getDependencies($method->getParameters());
 
+                        /**
+                         * We keep this line in the try/catch block as well in order to skip it if an exception is thrown,
+                         * otherwise we would get native PHP errors.. Nasty.
+                         */
                         call_user_func_array(array($object, $method->name), $dependencies);
 
-                    } catch (ResolveException $e) {
-                        throw $e;
+                    /**
+                     * If an ParameterResolveException is thrown it hit a non class injector method and we simply ignore these
+                     * We do NOT catch ResolveExceptions since a not found class is something we' re not responsible for.
+                     */
                     } catch (ParameterResolveException $e) {
-                        throw $e;
                     }
                 }
             }
             
             return $object;
 
-        }, false);
+        });
     }
 
     public function onResolving(Closure $callback)

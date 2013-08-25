@@ -78,6 +78,30 @@ The container doesn' t know what to do with this ```LoggerInterface```. Since th
 
 If a class requires an implementation of the ```LoggerInterface``` the container knows which implementation to use!
 
+
+The ```Container::enableInjecterDetection()``` takes as optional argument a blacklist.
+
+The exact display of the method is:
+
+    \DaGardner\DaContainer\Container::enableInjecterDetection([array $blacklist = array()])
+
+The blacklist should (has to be) constructed like this:
+
+    [
+      'setString',
+      'setArray',
+      '_CLASSES_' => [
+        'SomeClass' => [
+          'setLogger'
+        ]
+      ]
+    
+    ]
+
+Strings in the main array are consired to be global and are ignored everytime.
+
+The class specific blacklist is only checked if the object is an instance of this class. A blacklist for a class should go into the ```_CLASSES_``` key.
+
 ### Events
 
 The IoC Container has it' s own simple event system, which can be used standalone or getting hooked into the main event dispatcher!
