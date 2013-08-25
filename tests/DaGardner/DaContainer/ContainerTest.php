@@ -210,6 +210,23 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $con = new Container;
         $con->resolve('DependsOnMissingClass');
     }
+
+    public function testResolveParameter()
+    {
+        $con = new Container;
+
+        $obj = $con->resolve('DependsOnStringDefault');
+    }
+
+    /**
+     * @expectedException \DaGardner\DaContainer\Exceptions\ParameterResolveException
+     */
+    public function testResolveException()
+    {
+        $con = new Container;
+
+        $obj = $con->resolve('DependsOnString');
+    }
 }
 
 
@@ -248,4 +265,19 @@ class ConcreteInjectorMethods
 class DependsOnMissingClass
 {
     public function __construct(Foo $foo) {}
+}
+
+class DependsOnMissingClassDefault
+{
+    public function __construct(Foo $foo = null) {}
+}
+
+class DependsOnStringDefault
+{
+    public function __construct($str = "String") {}
+}
+
+class DependsOnString
+{
+    public function __construct($str) {}
 }

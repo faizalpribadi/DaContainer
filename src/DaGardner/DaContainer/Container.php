@@ -118,15 +118,8 @@ class Container implements ArrayAccess
 
         $concrete = $this->getConcrete($id);
 
-        if ($this->isInstantiable($id, $concrete)) {
+        $object = $this->build($concrete, $parameters, false);
 
-            $object = $this->build($concrete, $parameters, false);
-
-        } else {
-
-            $object = $this->resolve($concrete, $parameters, false);
-
-        }
 
         if ($this->isSingelton($id)) {
             
@@ -147,6 +140,8 @@ class Container implements ArrayAccess
      * @param  array                $parameters Parameters are getting passed to the factory
      * @param  boolen               $final      Whether this the final resolve of a class
      * @return mixed                            The new instance
+     *
+     * @throws \DaGardner\DaContainer\Exceptions\ResolveException
      */
     public function build($concrete, array $parameters = array(), $final = true)
     {
@@ -215,6 +210,8 @@ class Container implements ArrayAccess
      * The class specific blacklist is only checked if the object is an instance of this class
      * 
      * @param  array  $blacklist A blacklist of method names
+     *
+     * @throws \DaGardner\DaContainer\Exceptions\ResolveException
      */
     public function enableInjecterDetection(array $blacklist = array())
     {
@@ -279,36 +276,20 @@ class Container implements ArrayAccess
      * Returns the concrete of the given id
      * @param  string $id The id
      * @return mixed      The concrete
+     *
+     * @throws \DaGardner\DaContainer\Exceptions\ResolveException
      */
     protected function getConcrete($id)
     {
         if (!isset($this->binds[$id])) {
 
-            if (class_exists($id)) {
-
-                return $id;
-
-            }
-            
-            throw new ResolveException('ID is not bound and not a class');
-            
+            return $id;          
 
         } else {
 
             return $this->binds[$id]['concrete'];
 
         }
-    }
-
-    /**
-     * Checks if a concrete can get instantiated
-     * @param  string  $id       The id of the concrete
-     * @param  mixed   $concrete The concrete
-     * @return boolean           Whether the conrete is instantiable
-     */
-    protected function isInstantiable($id, $concrete)
-    {
-        return ($concrete === $id || $concrete instanceof Closure);
     }
 
     /**
@@ -325,6 +306,8 @@ class Container implements ArrayAccess
      * Resolve all dependencies of the reflection parameters
      * @param  array $parameters    The parameters
      * @return array                The resolved dependencies
+     *
+     * @throws \DaGardner\DaContainer\Exceptions\ResolveException
      */
     protected function getDependencies($parameters)
     {
@@ -337,7 +320,7 @@ class Container implements ArrayAccess
                 $dependency = $parameter->getClass();
 
             } catch (ReflectionException $e) {
-                
+
                 throw new ResolveException('Target <' . $parameter . '> could not be found.');
 
             }
@@ -361,27 +344,11 @@ class Container implements ArrayAccess
      * @param  \ReflectionParameter $parameter The parameter
      * @return mixed                           The resolved class
      *
-     * @throws \Modulework\Modules\Container\Exceptions\ResolveException If the class cannot get resolved.
+     * @throws \DaGardner\DaContainer\Exceptions\ResolveException
      */
     protected function resolveClass($parameter)
     {
-        try {
-
-            return $this->resolve($parameter->getClass()->name, array(), false);
-
-        } catch (ResolveException $e) {
-
-            if ($parameter->isOptional()) {
-                // Just pass the default
-                return $parameter->getDefaultValue();
-
-            } else {
-
-                throw $e;
-
-            }
-
-        }
+        return $this->resolve($parameter->getClass()->name, array(), false);
     }
 
     /**
@@ -389,7 +356,7 @@ class Container implements ArrayAccess
      * @param  \ReflectionParamter $parameter The parameter
      * @return mixed                          The resolved type
      *
-     * @throws \Modulework\Modules\Container\Exceptions\ParameterResolveException If the parameter cannot get resolved.
+     * @throws \DaGardner\DaContainer\Exceptions\ParameterResolveException
      */
     protected function resolveArgument($parameter)
     {
