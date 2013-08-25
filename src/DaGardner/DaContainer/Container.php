@@ -209,15 +209,15 @@ class Container implements ArrayAccess
         }, false);
     }
 
-    public function onResolving(Closure $callback, $silent = true)
+    public function onResolving(Closure $callback, $active = false)
     {
-        if ($silent) {
+        if ($active) {
             
-            $this->silentCallbacks[] = $callback;
+            $this->callbacks[] = $callback;
 
         } else {
 
-            $this->callbacks[] = $callback;
+            $this->silentCallbacks[] = $callback;
 
         }
     }
