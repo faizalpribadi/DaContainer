@@ -95,8 +95,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
         $con->onResolving(function($object) {
             $object->bar = 'baz';
-            return $object;
-        }, false);
+        });
 
         $con->bind('foo', function()
         {
@@ -105,27 +104,6 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
 
         $this->assertEquals('baz', $con->resolve('foo')->bar);
-    }
-
-    public function testSilentResolverCallbacks()
-    {
-        $con = new Container;
-
-        $con->onResolving(function($object)
-        {
-            echo $object->foo;
-        });
-
-        $con->bind('foo', function()
-        {
-            $ret = new stdClass;
-            $ret->foo = 'bar';
-            return $ret;
-        });
-
-        $this->expectOutputString('bar');
-
-        $con->resolve('foo');
     }
 
     public function testDependenyInjectionConstructor()

@@ -85,36 +85,3 @@ The IoC Container has it' s own simple event system, which can be used standalon
     $container->onResolving(function($object) {
       // Do something
     });
-
-**NOTE!** This event fires on the main resolve ONLY. That means that it doesn' t fire when the container is resolving dependencies.
-
-There are two types listeners. Silent and active listeners.
-
-#### Silent
-
-Theses listeners are getting the resolved object handed over and are then ignored by the container. Manipulations on the object are not applied to the resolved object.
-
-##### Active
-
-You can register a active listener the same way as a silten one, just pass ```true``` as the second argument to the ```onResolving()``` method.
-
-Theses listeners are getting the resolved object handed over and the container replaces the return of the listener with the object.
-
-Active listerners should **always** return the same (and perhaps modified) object, otherwise you won' t be able to use the container anymore:
-
-    /**
-     * Correct usage!
-     */
-    $container->onResolving(function($object) {
-      // Do something
-      return $object;
-    }, true);
-
-
-    /**
-     * WRONG usage!
-     */
-    $container->onResolving(function($object) {
-      // Do something
-      return null;
-    }, true);
