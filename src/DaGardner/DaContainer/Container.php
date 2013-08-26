@@ -128,7 +128,9 @@ class Container implements ArrayAccess
         }
 
         if ($final) {
+
             $this->fireCallbacks($object);
+
         }        
 
         return $object;
@@ -220,7 +222,9 @@ class Container implements ArrayAccess
     public function enableInjecterDetection(array $blacklist = array(), $version = PHP_VERSION)
     {
         if (version_compare($version, '5.4.0') <= 0) {
-            throw new RunTimeException('This feature requires PHP 5.4 or higher'); 
+
+            throw new RunTimeException('This feature requires PHP 5.4 or higher');
+
         }
 
         $this->onResolving(function ($object) use ($blacklist) {
@@ -242,7 +246,9 @@ class Container implements ArrayAccess
                     
                     // Just check if the method is in the blacklist
                     if (in_array($method->name, $blacklist) || (isset($blacklist['_CLASSES_'][$class]) && in_array($method->name, $blacklist['_CLASSES_'][$class]))) {
+
                         continue;
+
                     }
 
                     try {
@@ -290,7 +296,7 @@ class Container implements ArrayAccess
     public function onResolving(Closure $callback, $priority = 0)
     {
         if (!isset($this->callbacks[$priority])) {
-            
+
             $this->callbacks[$priority] = array();
 
         }
@@ -391,7 +397,6 @@ class Container implements ArrayAccess
 
         } else {
             // We cannot guess the value, can we!
-            
             throw new ParameterResolveException('Unresolvable parameter <' . $parameter . '>');
             
         }
@@ -400,6 +405,7 @@ class Container implements ArrayAccess
     protected function fireCallbacks($object)
     {
         ksort($this->callbacks);
+
         foreach ($this->callbacks as $priorities) {
             
             foreach ($priorities as $callback) {
