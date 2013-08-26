@@ -8,9 +8,6 @@ But in order to keep this repo clean and sleek there are some guidelines:
 
 This project is following the PSR-0, PSR-1 and PSR-2 standards.
 
-## Branch
-
-All pull request should go into the develope branch. Pull requests into the master branch will get rejected.
 
 ## How to do a pull request
 
