@@ -1,5 +1,8 @@
 # DaContainer
-
+[![Build Status](https://travis-ci.org/ChristianGaertner/DaContainer.png?branch=master)](https://travis-ci.org/ChristianGaertner/DaContainer)
+[![Coverage Status](https://coveralls.io/repos/ChristianGaertner/DaContainer/badge.png?branch=master)](https://coveralls.io/r/ChristianGaertner/DaContainer?branch=master)
+[![Latest Stable Version](https://poser.pugx.org/dagardner/dacontainer/v/stable.png)](https://packagist.org/packages/dagardner/dacontainer)
+[![Dependency Status](https://www.versioneye.com/user/projects/521b6093632bac7a59008409/badge.png)](https://www.versioneye.com/user/projects/521b6093632bac7a59008409)
 
 A simpe IoC container for PHP.
 
