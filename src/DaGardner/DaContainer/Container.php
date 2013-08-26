@@ -59,8 +59,7 @@ class Container implements ArrayAccess
             // that it is a classname and wrap it into a closure so it' s
             // easier when resolving.
 
-            $concrete = function($container) use ($id, $concrete)
-            {
+            $concrete = function ($container) use ($id, $concrete) {
                 $method = ($id == $concrete) ? 'build' : 'resolve';
 
                 return $container->$method($concrete, array(), false);
@@ -224,8 +223,7 @@ class Container implements ArrayAccess
             throw new RunTimeException('This feature requires PHP 5.4 or higher'); 
         }
 
-        $this->onResolving(function($object) use ($blacklist)
-        {
+        $this->onResolving(function ($object) use ($blacklist) {
             $class = get_class($object);
 
             $reflection = new ReflectionClass($class);
