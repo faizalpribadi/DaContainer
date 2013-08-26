@@ -4,6 +4,7 @@
     "keywords": ["ioc", "container", "dependency"],
     "description": "A simple but still advanced IoC container.",
     "require-dev": {
+        "satooshi/php-coveralls": "dev-master"
     },
     "license": "MIT",
     "authors": [
