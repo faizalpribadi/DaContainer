@@ -285,6 +285,26 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $con = new Container;
         $con->enableInjecterDetection(array(), '5.3.0');
     }
+
+    public function testBuildDimdBlacklist()
+    {
+        $con = new Container;
+
+        $con->enableInjecterDetection();
+        $con->disableInjecterDetection();
+
+        $this->assertEquals(array(), $con->getDimdBlacklist());
+
+
+        $con->enableInjecterDetection(array('foo'));
+        $con->disableInjecterDetection();
+
+        $this->assertEquals(array('foo'), $con->getDimdBlacklist());
+
+        $con->enableInjecterDetection();
+
+        $this->assertEquals(array('foo'), $con->getDimdBlacklist());
+    }
 }
 
 

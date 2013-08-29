@@ -39,6 +39,12 @@ class Container implements ArrayAccess
     protected $callbacks = array();
 
     /**
+     * The blacklist for the dependeny injection method detection
+     * @var array
+     */
+    protected $dimbBlacklist = array();
+
+    /**
      * Register a binding
      * @param  string               $id        The id (needed for resolving)
      * @param  Closure|string|null  $concrete  The factory
@@ -47,11 +53,7 @@ class Container implements ArrayAccess
     public function bind($id, $concrete, $singleton = false)
     {
 
-        if (is_null($concrete)) {
-            
-            $concrete = $id;
-
-        }
+        $concrete = $concrete ?: $id;
 
         if (!$concrete instanceof Closure) {
             
@@ -60,6 +62,7 @@ class Container implements ArrayAccess
             // easier when resolving.
 
             $concrete = function ($container) use ($id, $concrete) {
+
                 $method = ($id == $concrete) ? 'build' : 'resolve';
 
                 return $container->$method($concrete, array(), false);
@@ -152,6 +155,7 @@ class Container implements ArrayAccess
             return $concrete($this, $parameters);
 
         }
+
         try {
 
             $resolver = new ReflectionClass($concrete);
@@ -210,6 +214,8 @@ class Container implements ArrayAccess
      *
      * Strings in the main array are consired to be global and are ignored everytime.
      * The class specific blacklist is only checked if the object is an instance of this class
+     *
+     * If the blacklist is empty it will try to recover the previous used.
      * 
      * <strong>This feature requires PHP 5.4 or higher</strong>
      * 
@@ -226,6 +232,9 @@ class Container implements ArrayAccess
             throw new RunTimeException('This feature requires PHP 5.4 or higher');
 
         }
+
+        $blacklist = $this->buildDimdBlacklist($blacklist);
+        $this->dimbBlacklist = $blacklist;
 
         $this->onResolving(function ($object) use ($blacklist) {
             $class = get_class($object);
@@ -301,6 +310,11 @@ class Container implements ArrayAccess
 
         }
         $this->callbacks[$priority][] = $callback;
+    }
+
+    public function getDimdBlacklist()
+    {
+        return $this->dimbBlacklist;
     }
 
     /**
@@ -413,6 +427,28 @@ class Container implements ArrayAccess
                 $callback($object);
 
             }
+
+        }
+    }
+
+    /**
+     * Just a wrapper for some basic control structured
+     * @param  array  $blacklist The blacklist
+     * @return array             The newly builded blacklist
+     */
+    protected function buildDimdBlacklist(array $blacklist)
+    {
+        if (!empty($blacklist)) {
+
+            return $blacklist;
+
+        } elseif (!empty($this->dimbBlacklist)) {
+
+            return $this->dimbBlacklist;
+
+        } else {
+
+            return array();
 
         }
     }
