@@ -12,6 +12,10 @@ DaContainer is a powerful inversion of control container for managing class depe
 
 Simply add ```dagardner/dacontainer``` to your composer dependencies and run ```composer install```.
 
+    "require": {
+        "dagardner/dacontainer": "1.*"
+    }
+
 The last step is to include composer' s autoload file (like this: ```require './vendor/autoload.php'```.
 
 And thats it. In the next chapter we we' ll cover basic usage.
