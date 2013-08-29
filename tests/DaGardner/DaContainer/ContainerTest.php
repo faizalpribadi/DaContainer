@@ -286,8 +286,15 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $con->enableInjecterDetection(array(), '5.3.0');
     }
 
+    /**
+     * This test is skipped if we' re not an 5.4 or higher
+     */
     public function testBuildDimdBlacklist()
     {
+        if (version_compare(PHP_VERSION, '5.4.0') <= 0) {
+            return true;
+        }
+        
         $con = new Container;
 
         $con->enableInjecterDetection();
