@@ -312,9 +312,14 @@ class Container implements ArrayAccess
         $this->callbacks[$priority][] = $callback;
     }
 
+    /**
+     * Returns the currently used blacklist
+     * for the dependeny injection method detection
+     * @return array The blacklist
+     */
     public function getDimdBlacklist()
     {
-        return $this->dimbBlacklist;
+        return $this->dimbBlacklist ?: array();
     }
 
     /**
