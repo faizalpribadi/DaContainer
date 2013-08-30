@@ -37,7 +37,7 @@ And thats it. In the next chapter we we' ll cover basic usage.
 
 This will call the closure callback and therefor returns a new instance of a ```stdClass```.
 
-### Singeltons
+### Singletons
 
 Even if this pattern is often consired to be an anti-pattern, I implemented it, just in case somebody craves for it...
 
